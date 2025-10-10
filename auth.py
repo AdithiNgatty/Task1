@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-from database import db  # MongoDB client
+from database import db 
 
 # ---------------- Password hashing ----------------
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
