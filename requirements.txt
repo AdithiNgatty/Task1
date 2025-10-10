@@ -1,6 +1,8 @@
+python==3.12
 fastapi
 uvicorn
-motor
 pydantic
+
+# For JWT authentication
 python-jose[cryptography]
-passlib[bcrypt]
+passlib[argon2]
