@@ -1,56 +1,39 @@
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
-from passlib.context import CryptContext
-from datetime import datetime, timedelta
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 
-# -------------------- App Init --------------------
-app = FastAPI()
+from database import db
+from models import UserCreate, UserLogin, UserOut
+from auth import hash_password, verify_password, create_access_token, get_current_user, ACCESS_TOKEN_EXPIRE_MINUTES
+from datetime import timedelta
 
-# -------------------- Password Hashing (Argon2) --------------------
-# Install: pip install passlib[argon2]
-pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+app = FastAPI(title="FastAPI Auth with MongoDB")
 
-# -------------------- Token Setup --------------------
-SECRET_KEY = "mysecretkey"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# ---------------- SIGNUP ----------------
+@app.post("/signup", response_model=UserOut)
+async def signup(user: UserCreate):
+    existing = await db.users.find_one({"username": user.username})
+    if existing:
+        raise HTTPException(status_code=400, detail="Username already exists")
 
-# -------------------- Fake User (for demo) --------------------
-fake_user = {
-    "username": "adithi",
-    "hashed_password": pwd_context.hash("mypassword")
-}
+    hashed_pwd = hash_password(user.password)
+    user_dict = user.dict()
+    user_dict["password"] = hashed_pwd
 
-# -------------------- OAuth2 Scheme --------------------
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+    await db.users.insert_one(user_dict)
+    return UserOut(username=user.username, email=user.email)
 
-# -------------------- Password Verification --------------------
-def verify_password(plain_password: str, hashed_password: str):
-    return pwd_context.verify(plain_password, hashed_password)
+# ---------------- LOGIN / TOKEN ----------------
+@app.post("/login")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    db_user = await db.users.find_one({"username": form_data.username})
+    if not db_user or not verify_password(form_data.password, db_user["password"]):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
-# -------------------- Create JWT Token --------------------
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    token = create_access_token({"sub": db_user["username"]}, expires_delta=access_token_expires)
+    return {"access_token": token, "token_type": "bearer"}
 
-# -------------------- Login Route --------------------
-@app.post("/token")
-def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    if form_data.username != fake_user["username"] or not verify_password(form_data.password, fake_user["hashed_password"]):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-    access_token = create_access_token(data={"sub": fake_user["username"]})
-    return {"access_token": access_token, "token_type": "bearer"}
-
-# -------------------- Protected Route --------------------
-@app.get("/me")
-def read_me(token: str = Depends(oauth2_scheme)):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("sub")
-        return {"user": username}
-    except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+# ---------------- PROTECTED ROUTE ----------------
+@app.get("/me", response_model=UserOut)
+async def read_current_user(current_user: dict = Depends(get_current_user)):
+    return UserOut(username=current_user["username"], email=current_user["email"])

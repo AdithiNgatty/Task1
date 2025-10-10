@@ -6,3 +6,6 @@ pydantic
 # For JWT authentication
 python-jose[cryptography]
 passlib[argon2]
+
+#mongo db
+motor
