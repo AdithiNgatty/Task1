@@ -6,6 +6,8 @@ from backend.models import UserCreate, UserLogin, UserOut
 from backend.auth import hash_password, verify_password, create_access_token, get_current_user, ACCESS_TOKEN_EXPIRE_MINUTES
 from datetime import timedelta
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title="FastAPI Auth with MongoDB")
 
 # ---------------- SIGNUP ----------------
@@ -37,3 +39,12 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 @app.get("/me", response_model=UserOut)
 async def read_current_user(current_user: dict = Depends(get_current_user)):
     return UserOut(username=current_user["username"], email=current_user["email"])
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or ["http://localhost:3000"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)

@@ -1,13 +1,56 @@
 body {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: #f7fafc;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.nav {
+  background: #1f2937;
+  color: white;
+  padding: 12px 20px;
+  display: flex;
+  gap: 12px;
+}
+.nav a {
+  color: #e6eef8;
+  text-decoration: none;
+  font-weight: 600;
+}
+.container {
+  max-width: 720px;
+  margin: 36px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+}
+form input {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  margin: 10px 0;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+}
+button {
+  padding: 10px 14px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.message {
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 6px;
+}
+.message.error {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.message.success {
+  background: #ecfdf5;
+  color: #065f46;
 }
