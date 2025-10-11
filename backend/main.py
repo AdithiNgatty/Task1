@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
-from database import db
-from models import UserCreate, UserLogin, UserOut
-from auth import hash_password, verify_password, create_access_token, get_current_user, ACCESS_TOKEN_EXPIRE_MINUTES
+from backend.database import db
+from backend.models import UserCreate, UserLogin, UserOut
+from backend.auth import hash_password, verify_password, create_access_token, get_current_user, ACCESS_TOKEN_EXPIRE_MINUTES
 from datetime import timedelta
 
 app = FastAPI(title="FastAPI Auth with MongoDB")
