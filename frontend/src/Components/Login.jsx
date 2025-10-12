@@ -17,8 +17,6 @@ export default function Login() {
     }
 
     try {
-      // FastAPI's OAuth2PasswordRequestForm expects form-encoded data,
-      // sending FormData works fine.
       const fd = new FormData();
       fd.append("username", form.username);
       fd.append("password", form.password);
