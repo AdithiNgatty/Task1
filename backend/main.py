@@ -4,17 +4,28 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import timedelta
 import random, smtplib, os
 from email.mime.text import MIMEText
+from pathlib import Path
 from dotenv import load_dotenv
 
 from backend.database import db
 from backend.models import UserCreate, OTPVerify, UserOut
 from backend.auth import hash_password, verify_password, create_access_token, get_current_user, ACCESS_TOKEN_EXPIRE_MINUTES
 
-# -------------------- Load .env --------------------
-load_dotenv()
+# -------------------- Load .env explicitly --------------------
+env_path = Path(__file__).parent / ".env"
+if not env_path.exists():
+    raise RuntimeError(f".env file not found at {env_path}")
+
+load_dotenv(dotenv_path=env_path)
 
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
+
+# -------------------- Debug check --------------------
+if not SENDER_EMAIL or not SENDER_PASSWORD:
+    raise RuntimeError("SENDER_EMAIL or SENDER_PASSWORD not set in .env")
+
+print("✅ SENDER_EMAIL loaded:", SENDER_EMAIL)
 
 # -------------------- FastAPI app --------------------
 app = FastAPI(title="FastAPI Auth with MongoDB + OTP")
@@ -22,32 +33,29 @@ app = FastAPI(title="FastAPI Auth with MongoDB + OTP")
 # -------------------- CORS --------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change to ["http://localhost:3000"] in production
+    allow_origins=["*"],  # Change in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# -------------------- Send OTP --------------------
+# -------------------- Helper: Send OTP --------------------
 def send_otp_email(recipient_email: str, otp: str):
-    if not SENDER_EMAIL or not SENDER_PASSWORD:
-        raise HTTPException(status_code=500, detail="Email not configured")
-
-    subject = "Your OTP Verification Code"
-    body = f"Your OTP code is: {otp}\nIt will expire in 5 minutes."
-
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = SENDER_EMAIL
-    msg["To"] = recipient_email
-
     try:
+        msg = MIMEText(f"Your OTP code is: {otp}\nIt will expire in 5 minutes.")
+        msg["Subject"] = "Your OTP Verification Code"
+        msg["From"] = SENDER_EMAIL
+        msg["To"] = recipient_email
+
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.starttls()
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
             server.send_message(msg)
+
+        print(f"✅ OTP sent to {recipient_email}: {otp}")
+
     except Exception as e:
-        print("Email sending failed:", e)
+        print("❌ Email sending failed:", e)
         raise HTTPException(status_code=500, detail="Failed to send OTP email")
 
 
