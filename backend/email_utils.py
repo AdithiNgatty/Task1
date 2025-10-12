@@ -10,6 +10,9 @@ SMTP_PORT = 587
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 
+print("Email:", SENDER_EMAIL)
+print("Password:", SENDER_PASSWORD)
+
 def send_otp_email(to_email: str, otp: str):
     subject = "Your OTP Verification Code"
     body = f"Your OTP for account verification is: {otp}\n\nThis code is valid for 5 minutes."

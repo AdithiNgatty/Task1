@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 
+# -------------------- User models --------------------
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
@@ -12,3 +13,8 @@ class UserLogin(BaseModel):
 class UserOut(BaseModel):
     username: str
     email: EmailStr
+
+# -------------------- OTP verification model --------------------
+class OTPVerify(BaseModel):
+    email: EmailStr
+    otp: str

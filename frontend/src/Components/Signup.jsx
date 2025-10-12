@@ -4,35 +4,33 @@ import { useNavigate } from "react-router-dom";
 
 export default function Signup() {
   const [form, setForm] = useState({ username: "", email: "", password: "" });
-  const [otp, setOtp] = useState(""); // new field for OTP
-  const [step, setStep] = useState(1); // step 1 = signup request, step 2 = verify
+  const [otp, setOtp] = useState(""); // stores the entered OTP
+  const [step, setStep] = useState(1); // 1 = signup form, 2 = otp verification
   const [msg, setMsg] = useState("");
   const [ok, setOk] = useState(false);
   const navigate = useNavigate();
 
-  // ------------------------------------------
-  // Step 1: Send signup request → OTP emailed
-  // ------------------------------------------
+  // -----------------------------------------------------
+  // STEP 1: Signup Request → backend sends OTP to email
+  // -----------------------------------------------------
   const handleSignupRequest = async (e) => {
     e.preventDefault();
     setMsg("");
     setOk(false);
 
+    // simple validation
     if (!form.username || !form.email || !form.password) {
       setMsg("Please fill all fields.");
       return;
     }
 
     try {
-      const fd = new FormData();
-      fd.append("username", form.username);
-      fd.append("email", form.email);
-      fd.append("password", form.password);
+      // send signup data to backend
+      const res = await API.post("/signup-request", form);
 
-      await API.post("/signup-request", fd);
       setOk(true);
-      setMsg("OTP sent to your email. Please verify.");
-      setStep(2); // move to OTP verification step
+      setMsg(res.data?.message || "OTP sent to your email. Please verify.");
+      setStep(2); // move to next step: OTP verification
     } catch (err) {
       console.error("Signup request error:", err);
       let detail = "Signup failed.";
@@ -43,9 +41,9 @@ export default function Signup() {
     }
   };
 
-  // ------------------------------------------
-  // Step 2: Verify OTP → Create account
-  // ------------------------------------------
+  // -----------------------------------------------------
+  // STEP 2: Verify OTP → backend creates user account
+  // -----------------------------------------------------
   const handleOtpVerify = async (e) => {
     e.preventDefault();
     setMsg("");
@@ -57,14 +55,14 @@ export default function Signup() {
     }
 
     try {
-      const fd = new FormData();
-      fd.append("email", form.email);
-      fd.append("otp", otp);
+      const res = await API.post("/signup-verify", {
+        email: form.email,
+        otp: otp,
+      });
 
-      await API.post("/signup-verify", fd);
       setOk(true);
-      setMsg("Account verified! Redirecting to login...");
-      setTimeout(() => navigate("/login"), 1400);
+      setMsg(res.data?.message || "Account verified! Redirecting to login...");
+      setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
       console.error("OTP verification error:", err);
       let detail = "OTP verification failed.";
@@ -75,13 +73,14 @@ export default function Signup() {
     }
   };
 
-  // ------------------------------------------
+  // -----------------------------------------------------
   // UI Rendering
-  // ------------------------------------------
+  // -----------------------------------------------------
   return (
-    <div>
+    <div style={{ maxWidth: "400px", margin: "0 auto", padding: "1rem" }}>
       <h2>Sign Up</h2>
 
+      {/* Step 1: Signup Form */}
       {step === 1 && (
         <form onSubmit={handleSignupRequest}>
           <input
@@ -101,10 +100,11 @@ export default function Signup() {
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
-          <button type="submit">Sign Up</button>
+          <button type="submit">Send OTP</button>
         </form>
       )}
 
+      {/* Step 2: OTP Verification */}
       {step === 2 && (
         <form onSubmit={handleOtpVerify}>
           <p>Enter the OTP sent to your email:</p>
@@ -114,11 +114,30 @@ export default function Signup() {
             onChange={(e) => setOtp(e.target.value)}
           />
           <button type="submit">Verify OTP</button>
+          <button
+            type="button"
+            onClick={() => {
+              setStep(1);
+              setMsg("");
+              setOk(false);
+            }}
+            style={{ marginLeft: "10px" }}
+          >
+            Edit Info
+          </button>
         </form>
       )}
 
+      {/* Message box */}
       {msg && (
-        <div className={`message ${ok ? "success" : "error"}`}>
+        <div
+          className={`message ${ok ? "success" : "error"}`}
+          style={{
+            marginTop: "1rem",
+            color: ok ? "green" : "red",
+            fontWeight: 500,
+          }}
+        >
           {msg}
         </div>
       )}
