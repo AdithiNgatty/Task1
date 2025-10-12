@@ -4,9 +4,10 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 import random
-
+from dotenv import load_dotenv
 from backend.database import db
 from backend.email_utils import send_otp_email
+import os
 
 # ---------------- Password Hashing ----------------
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
@@ -18,9 +19,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 # ---------------- JWT Setup ----------------
-SECRET_KEY = "mysecretkey"  # ⚠️ move to .env file in production
+load_dotenv()
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY=os.getenv("SECRET_KEY")
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
