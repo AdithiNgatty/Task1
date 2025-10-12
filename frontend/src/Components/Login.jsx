@@ -60,7 +60,7 @@ export default function Login() {
         <button type="submit">Login</button>
       </form>
 
-      {msg && <div className="message error">{msg}</div>}
+      {msg && <div className="message success">{msg}</div>}
     </div>
   );
 }
