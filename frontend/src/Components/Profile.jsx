@@ -13,7 +13,8 @@ export default function Profile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await API.get("/me"); // /me returns username, email, bio
+        // ✅ Fetch from /users/me (not /me)
+        const res = await API.get("/users/me");
         setUser(res.data);
         setBio(res.data.bio || "");
         setMsg("");
@@ -26,6 +27,7 @@ export default function Profile() {
           detail = err.response.data.detail;
         }
         setMsg(detail);
+        // optional redirect to login
         setTimeout(() => navigate("/login"), 1000);
       }
     };
@@ -38,7 +40,7 @@ export default function Profile() {
     navigate("/login");
   };
 
-  // -------------------- Save or Update Bio --------------------
+  // -------------------- Create or Update Bio --------------------
   const handleSaveBio = async () => {
     try {
       if (!bio.trim()) {
@@ -46,15 +48,16 @@ export default function Profile() {
         return;
       }
 
-      const endpoint = user?.bio ? "/me/bio" : "/me/bio"; // same endpoint for create/update
+      // ✅ Use correct endpoint and method
       const method = user?.bio ? "put" : "post";
-      const res = await API[method](endpoint, { bio });
+      const res = await API[method]("/users/me/bio", { bio });
+
       setUser(res.data);
       setEditing(false);
       setMsg("Bio saved successfully!");
       setTimeout(() => setMsg(""), 2000);
     } catch (err) {
-      console.error("Error saving bio:", err);
+      console.error("Error saving bio:", err.response?.data || err);
       setMsg("Failed to save bio.");
     }
   };
@@ -62,20 +65,20 @@ export default function Profile() {
   // -------------------- Delete Bio --------------------
   const handleDeleteBio = async () => {
     try {
-      await API.delete("/me/bio");
+      await API.delete("/users/me/bio");
       setBio("");
       setUser({ ...user, bio: "" });
       setMsg("Bio deleted.");
       setTimeout(() => setMsg(""), 2000);
     } catch (err) {
-      console.error("Error deleting bio:", err);
+      console.error("Error deleting bio:", err.response?.data || err);
       setMsg("Failed to delete bio.");
     }
   };
 
   // -------------------- UI --------------------
   return (
-    <div style={{ maxWidth: "500px", margin: "2rem auto", textAlign: "left" }}>
+    <div style={{ maxWidth: "600px", margin: "2rem auto", textAlign: "left" }}>
       <h2>Profile</h2>
 
       {user ? (
@@ -92,7 +95,14 @@ export default function Profile() {
                 {user.bio && (
                   <button
                     onClick={handleDeleteBio}
-                    style={{ marginLeft: "10px", color: "red" }}
+                    style={{
+                      marginLeft: "10px",
+                      background: "red",
+                      color: "white",
+                      border: "none",
+                      padding: "5px 10px",
+                      cursor: "pointer",
+                    }}
                   >
                     Delete Bio
                   </button>
@@ -105,7 +115,13 @@ export default function Profile() {
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Write something about yourself..."
-                  style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    marginBottom: "10px",
+                    borderRadius: "5px",
+                    border: "1px solid #ccc",
+                  }}
                 />
                 <button onClick={handleSaveBio}>Save</button>
                 <button
@@ -123,7 +139,14 @@ export default function Profile() {
 
           <button
             onClick={handleLogout}
-            style={{ marginTop: "2rem", background: "gray", color: "white" }}
+            style={{
+              marginTop: "2rem",
+              background: "gray",
+              color: "white",
+              padding: "8px 12px",
+              border: "none",
+              cursor: "pointer",
+            }}
           >
             Logout
           </button>

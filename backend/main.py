@@ -6,6 +6,7 @@ import random, smtplib, os
 from email.mime.text import MIMEText
 from pathlib import Path
 from dotenv import load_dotenv
+from backend.profile import router as profile_router
 
 from backend.database import db
 from backend.models import UserCreate, OTPVerify, UserOut
@@ -25,7 +26,6 @@ SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 if not SENDER_EMAIL or not SENDER_PASSWORD:
     raise RuntimeError("SENDER_EMAIL or SENDER_PASSWORD not set in .env")
 
-print("SENDER_EMAIL loaded:", SENDER_EMAIL)
 
 # -------------------- FastAPI app --------------------
 app = FastAPI(title="FastAPI Auth with MongoDB + OTP")
@@ -38,6 +38,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(profile_router, prefix="/users", tags=["users"])
 
 # -------------------- Helper: Send OTP --------------------
 def send_otp_email(recipient_email: str, otp: str):
