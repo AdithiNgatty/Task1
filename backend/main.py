@@ -25,7 +25,7 @@ SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 if not SENDER_EMAIL or not SENDER_PASSWORD:
     raise RuntimeError("SENDER_EMAIL or SENDER_PASSWORD not set in .env")
 
-print("✅ SENDER_EMAIL loaded:", SENDER_EMAIL)
+print("SENDER_EMAIL loaded:", SENDER_EMAIL)
 
 # -------------------- FastAPI app --------------------
 app = FastAPI(title="FastAPI Auth with MongoDB + OTP")
@@ -52,10 +52,10 @@ def send_otp_email(recipient_email: str, otp: str):
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
             server.send_message(msg)
 
-        print(f"✅ OTP sent to {recipient_email}: {otp}")
+        print(f"OTP sent to {recipient_email}: {otp}")
 
     except Exception as e:
-        print("❌ Email sending failed:", e)
+        print("Email sending failed:", e)
         raise HTTPException(status_code=500, detail="Failed to send OTP email")
 
 
