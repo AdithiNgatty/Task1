@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
 
 # -------------------- User models --------------------
 class UserCreate(BaseModel):
@@ -18,3 +19,11 @@ class UserOut(BaseModel):
 class OTPVerify(BaseModel):
     email: EmailStr
     otp: str
+
+class BioIn(BaseModel):
+    bio: str = Field(..., min_length=1, max_length=1000, description="User biography text")
+
+class BioOut(BaseModel):
+    username: str
+    email: str
+    bio: Optional[str] = None
