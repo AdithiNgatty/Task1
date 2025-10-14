@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from typing import Optional
 from bson import ObjectId
-from backend.models import BioIn, BioOut
-from backend.auth import get_current_user
-from backend.database import db
+from backend.app.models import BioIn, BioOut
+from backend.app.auth import get_current_user
+from backend.app.database import db
 
 router = APIRouter()
 

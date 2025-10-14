@@ -13,7 +13,7 @@ export default function Profile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // ✅ Fetch from /users/me (not /me)
+        //Fetch from /users/me (not /me)
         const res = await API.get("/users/me");
         setUser(res.data);
         setBio(res.data.bio || "");
@@ -48,7 +48,7 @@ export default function Profile() {
         return;
       }
 
-      // ✅ Use correct endpoint and method
+      //Use correct endpoint and method
       const method = user?.bio ? "put" : "post";
       const res = await API[method]("/users/me/bio", { bio });
 
