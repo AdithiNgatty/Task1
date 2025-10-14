@@ -6,11 +6,11 @@ import random, smtplib, os
 from email.mime.text import MIMEText
 from pathlib import Path
 from dotenv import load_dotenv
-from backend.app.profile import router as profile_router
+from app.profile import router as profile_router
 
-from backend.app.database import db
-from backend.app.models import UserCreate, OTPVerify, UserOut
-from backend.app.auth import hash_password, verify_password, create_access_token, get_current_user, ACCESS_TOKEN_EXPIRE_MINUTES
+from database import db
+from models import UserCreate, OTPVerify, UserOut
+from auth import hash_password, verify_password, create_access_token, get_current_user, ACCESS_TOKEN_EXPIRE_MINUTES
 
 # -------------------- Load .env explicitly --------------------
 env_path = Path(__file__).parent / ".env"
