@@ -2,7 +2,9 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import timedelta
-import random, smtplib, os
+import random
+import smtplib
+import os
 from email.mime.text import MIMEText
 from pathlib import Path
 from dotenv import load_dotenv
